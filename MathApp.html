@@ -1,0 +1,793 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daily Math Problems</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f2f5;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start; /* Align to the top */
+            min-height: 100vh; /* Use min-height to allow content to expand */
+            padding: 20px; /* Add padding around the main container */
+            position: relative; /* Needed for absolute positioning of clock */
+        }
+        .container {
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 32px;
+            width: 100%;
+            max-width: 960px; /* Increased max-width for better problem display */
+            box-sizing: border-box;
+            margin-top: 20px; /* Add margin to the top */
+        }
+        .problem-card {
+            background-color: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            padding: 20px;
+            position: relative;
+            overflow: hidden; /* For rounded corners */
+        }
+        .problem-question {
+            font-size: 1.125rem; /* text-lg */
+            font-weight: 500; /* font-medium */
+            margin-bottom: 12px;
+            color: #374151; /* text-gray-700 */
+        }
+        .solution {
+            background-color: #ecf0f1;
+            padding: 12px;
+            border-radius: 6px;
+            margin-top: 12px;
+            display: none; /* Hidden by default */
+            color: #2c3e50;
+            font-weight: bold;
+        }
+        .solution.visible {
+            display: block;
+        }
+        .toggle-button {
+            background-color: #3498db;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background-color 0.3s ease;
+            margin-top: 10px;
+            display: inline-block;
+        }
+        .toggle-button:hover {
+            background-color: #2980b9;
+        }
+        /* Style for LaTeX formulas */
+        .latex-formula {
+            display: inline; /* Use inline for smaller formulas */
+            font-family: 'Times New Roman', serif; /* Or a specific math font */
+            font-size: 1.1em; /* Slightly larger for formulas */
+            white-space: pre-wrap; /* Preserve whitespace and allow wrapping */
+        }
+        .latex-display-formula {
+            display: block; /* Use block for larger, centered formulas */
+            margin: 15px 0;
+            text-align: center;
+            font-family: 'Times New Roman', serif;
+            font-size: 1.2em;
+        }
+        #timer-display {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .timer-controls button {
+            background-color: #2ecc71;
+            margin: 0 8px;
+            padding: 10px 20px;
+            border-radius: 8px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        .timer-controls button:hover {
+            background-color: #27ae60;
+        }
+        .timer-controls button:nth-child(2) { /* Stop button */
+            background-color: #e74c3c;
+        }
+        .timer-controls button:nth-child(2):hover {
+            background-color: #c0392b;
+        }
+        .timer-controls button:nth-child(3) { /* Reset button */
+            background-color: #f39c12;
+        }
+        .timer-controls button:nth-child(3):hover {
+            background-color: #e67e22;
+        }
+
+        #digital-clock {
+            position: absolute;
+            top: 20px; /* Align with the top padding of the body */
+            left: 20px; /* Align with the left padding of the body */
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #2c3e50;
+            background-color: #ffffff;
+            padding: 10px 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        @media (max-width: 1024px) { /* Adjust for smaller screens */
+            #digital-clock {
+                position: static; /* Remove absolute positioning */
+                margin-bottom: 20px; /* Add space below it */
+                text-align: center;
+                width: 100%; /* Take full width */
+                box-sizing: border-box; /* Include padding in width */
+            }
+            body {
+                flex-direction: column; /* Stack elements vertically */
+                align-items: center; /* Center horizontally */
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 24px;
+                margin-top: 10px;
+            }
+            .problem-card {
+                padding: 16px;
+            }
+            .problem-question {
+                font-size: 1rem;
+            }
+            .timer-controls {
+                flex-direction: column;
+                gap: 10px;
+            }
+            .timer-controls button {
+                width: 100%;
+                margin: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="digital-clock">00:00:00</div>
+
+    <div class="container">
+        <h1 class="text-3xl font-bold text-center text-gray-800 mb-8">Daily Math Challenge</h1>
+        <p class="text-center text-gray-600 mb-8">Here are 16 randomly generated math problems for you. Click "Show Solution" to reveal the answer!</p>
+
+        <div id="timer-display">00:00:00</div>
+        <div class="flex justify-center mb-8 timer-controls">
+            <button id="start-timer">Start Timer</button>
+            <button id="stop-timer">Stop Timer</button>
+            <button id="reset-timer">Reset Timer</button>
+        </div>
+
+        <div id="problems-container" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Math problems will be injected here by JavaScript -->
+        </div>
+        <div class="flex justify-center mt-8">
+            <button id="generate-new-problems" class="toggle-button px-6 py-3 bg-green-600 hover:bg-green-700 text-lg">Generate New Problems</button>
+        </div>
+    </div>
+
+    <script>
+        // Timer variables
+        let startTime;
+        let timerInterval;
+        let elapsedTime = 0;
+        let isTimerRunning = false;
+
+        // Problem generation logic
+        function generateProblem(level) {
+            let problem = { question: '', solution: '', difficulty: level };
+            let type;
+
+            const getRandomInt = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
+            const getRandomArbitrary = (min, max) => Math.random() * (max - min) + min;
+
+            // Function to format fractions for MathJax
+            const formatFraction = (numerator, denominator) => {
+                if (denominator === 0) return "Undefined";
+                if (denominator === 1) return `${numerator}`;
+                const gcd = (a, b) => (b === 0 ? a : gcd(b, a % b));
+                const common = gcd(numerator, denominator);
+                return `\\frac{${numerator / common}}{${denominator / common}}`;
+            };
+
+            // Function to format polynomials for MathJax
+            const formatPolynomial = (coeffs) => {
+                let poly = '';
+                for (let i = coeffs.length - 1; i >= 0; i--) {
+                    const coeff = coeffs[i];
+                    if (coeff === 0) continue;
+                    let term = '';
+                    if (i === 0) { // Constant term
+                        term = `${coeff}`;
+                    } else if (i === 1) { // x term
+                        term = `${coeff === 1 ? '' : coeff === -1 ? '-' : coeff}x`;
+                    } else { // x^n term
+                        term = `${coeff === 1 ? '' : coeff === -1 ? '-' : coeff}x^${i}`;
+                    }
+                    if (poly === '') {
+                        poly = term;
+                    } else {
+                        poly += (coeff > 0 ? '+' : '') + term;
+                    }
+                }
+                return poly || '0';
+            };
+
+            switch (level) {
+                case '5th Grade':
+                    const types5th = ['arithmetic', 'fraction_add', 'decimal_add', 'geometry_perimeter'];
+                    type = types5th[getRandomInt(0, types5th.length - 1)];
+
+                    switch (type) {
+                        case 'arithmetic':
+                            const ops = ['+', '-', '*', '/'];
+                            const op = ops[getRandomInt(0, ops.length - 1)];
+                            let num1, num2;
+                            if (op === '/') {
+                                num2 = getRandomInt(2, 12);
+                                num1 = num2 * getRandomInt(2, 10);
+                            } else {
+                                num1 = getRandomInt(10, 500);
+                                num2 = getRandomInt(1, 400);
+                            }
+                            problem.question = `What is $${num1} ${op} ${num2}$?`;
+                            try {
+                                problem.solution = eval(`${num1} ${op} ${num2}`);
+                            } catch (e) {
+                                problem.solution = "Error calculating."; // Should not happen with current ops
+                            }
+                            break;
+                        case 'fraction_add':
+                            const den = getRandomInt(2, 10);
+                            const numA = getRandomInt(1, den - 1);
+                            const numB = getRandomInt(1, den - 1);
+                            problem.question = `Add the fractions: $${formatFraction(numA, den)} + ${formatFraction(numB, den)}$`;
+                            problem.solution = `${formatFraction(numA + numB, den)}`;
+                            break;
+                        case 'decimal_add':
+                            const dec1 = (Math.random() * 100).toFixed(2);
+                            const dec2 = (Math.random() * 50).toFixed(2);
+                            problem.question = `What is $${dec1} + ${dec2}$?`;
+                            problem.solution = (parseFloat(dec1) + parseFloat(dec2)).toFixed(2);
+                            break;
+                        case 'geometry_perimeter':
+                            const shapeType = ['rectangle', 'square', 'triangle'][getRandomInt(0, 2)];
+                            if (shapeType === 'rectangle') {
+                                const length = getRandomInt(5, 20);
+                                const width = getRandomInt(5, 20);
+                                problem.question = `A rectangle has a length of $${length}$ units and a width of $${width}$ units. What is its perimeter?`;
+                                problem.solution = `${2 * (length + width)}$ units`;
+                            } else if (shapeType === 'square') {
+                                const side = getRandomInt(5, 15);
+                                problem.question = `A square has a side length of $${side}$ units. What is its perimeter?`;
+                                problem.solution = `${4 * side}$ units`;
+                            } else { // triangle (equilateral)
+                                const side = getRandomInt(5, 15);
+                                problem.question = `An equilateral triangle has a side length of $${side}$ units. What is its perimeter?`;
+                                problem.solution = `${3 * side}$ units`;
+                            }
+                            break;
+                    }
+                    break;
+
+                case 'High School':
+                    const typesHS = [
+                        'algebra_linear', 'algebra_quadratic', 'geometry_area_volume', 'trigonometry_basic',
+                        'algebra_systems_2x2', 'geometry_pythagorean', 'exponential_basic', 'circle_equation'
+                    ];
+                    type = typesHS[getRandomInt(0, typesHS.length - 1)];
+
+                    switch (type) {
+                        case 'algebra_linear':
+                            const a = getRandomInt(-5, 5); // coefficient of x
+                            const b = getRandomInt(-20, 20); // constant
+                            const c = getRandomInt(-20, 20); // right side
+                            if (a === 0) { // Avoid division by zero, simplify to constant check
+                                problem.question = `Solve for $x$: $${b} = ${c}$`;
+                                problem.solution = (b === c) ? "Infinite solutions" : "No solution";
+                            } else {
+                                problem.question = `Solve for $x$: $${a}x + ${b} = ${c}$`;
+                                problem.solution = `x = ${((c - b) / a).toFixed(2)}`;
+                            }
+                            break;
+                        case 'algebra_quadratic':
+                            const r1 = getRandomInt(-5, 5);
+                            const r2 = getRandomInt(-5, 5);
+                            const B = -(r1 + r2);
+                            const C = r1 * r2;
+                            problem.question = `Solve for $x$: $x^2 ${B >= 0 ? '+' : ''} ${B}x ${C >= 0 ? '+' : ''} ${C} = 0$`;
+                            problem.solution = `x = ${r1}, x = ${r2}`;
+                            break;
+                        case 'geometry_area_volume':
+                            const geoTypes = ['triangle_area', 'circle_area', 'cylinder_volume', 'sphere_volume', 'cone_volume'];
+                            const geoType = geoTypes[getRandomInt(0, geoTypes.length - 1)];
+                            if (geoType === 'triangle_area') {
+                                const base = getRandomInt(5, 20);
+                                const height = getRandomInt(5, 20);
+                                problem.question = `A triangle has a base of $${base}$ cm and a height of $${height}$ cm. What is its area?`;
+                                problem.solution = `${(0.5 * base * height).toFixed(2)}$ cm$^2$`;
+                            } else if (geoType === 'circle_area') {
+                                const radius = getRandomInt(3, 10);
+                                problem.question = `What is the area of a circle with a radius of $${radius}$ cm? (Use $\\pi \\approx 3.14$)`;
+                                problem.solution = `${(Math.PI * radius * radius).toFixed(2)}$ cm$^2$`;
+                            } else if (geoType === 'cylinder_volume') {
+                                const radius = getRandomInt(2, 7);
+                                const height = getRandomInt(5, 15);
+                                problem.question = `A cylinder has a radius of $${radius}$ cm and a height of $${height}$ cm. What is its volume? (Use $\\pi \\approx 3.14$)`;
+                                problem.solution = `${(Math.PI * radius * radius * height).toFixed(2)}$ cm$^3$`;
+                            } else if (geoType === 'sphere_volume') {
+                                const radius = getRandomInt(2, 8);
+                                problem.question = `What is the volume of a sphere with a radius of $${radius}$ cm? (Use $\\pi \\approx 3.14$)`;
+                                problem.solution = `${((4/3) * Math.PI * Math.pow(radius, 3)).toFixed(2)}$ cm$^3$`;
+                            } else if (geoType === 'cone_volume') {
+                                const radius = getRandomInt(2, 8);
+                                const height = getRandomInt(5, 15);
+                                problem.question = `What is the volume of a cone with a radius of $${radius}$ cm and a height of $${height}$ cm? (Use $\\pi \\approx 3.14$)`;
+                                problem.solution = `${((1/3) * Math.PI * radius * radius * height).toFixed(2)}$ cm$^3$`;
+                            }
+                            break;
+                        case 'trigonometry_basic':
+                            const angleDeg = [30, 45, 60, 90, 120, 135, 150, 180][getRandomInt(0, 7)];
+                            const angleRad = angleDeg * (Math.PI / 180);
+                            const trigFunc = ['sin', 'cos', 'tan'][getRandomInt(0, 2)];
+                            let ans;
+                            if (trigFunc === 'sin') {
+                                ans = Math.sin(angleRad).toFixed(4);
+                            } else if (trigFunc === 'cos') {
+                                ans = Math.cos(angleRad).toFixed(4);
+                            } else {
+                                ans = Math.tan(angleRad).toFixed(4);
+                            }
+                            problem.question = `What is $${trigFunc}(${angleDeg}^\\circ)$? (Round to 4 decimal places)`;
+                            problem.solution = ans;
+                            break;
+                        case 'algebra_systems_2x2':
+                            // Simple system with integer solutions
+                            const x_sol = getRandomInt(-5, 5);
+                            const y_sol = getRandomInt(-5, 5);
+                            const a1 = getRandomInt(1, 3);
+                            const b1 = getRandomInt(1, 3);
+                            const c1 = a1 * x_sol + b1 * y_sol;
+                            const a2 = getRandomInt(1, 3);
+                            const b2 = getRandomInt(-3, -1); // Make b2 negative to ensure non-proportional equations
+                            const c2 = a2 * x_sol + b2 * y_sol;
+
+                            problem.question = `Solve the system of equations:\n$$\\begin{cases} ${a1}x + ${b1}y = ${c1} \\\\ ${a2}x + ${b2}y = ${c2} \\end{cases}$$`;
+                            problem.solution = `x = ${x_sol}, y = ${y_sol}`;
+                            break;
+                        case 'geometry_pythagorean':
+                            const typePy = ['find_hypotenuse', 'find_leg'][getRandomInt(0, 1)];
+                            if (typePy === 'find_hypotenuse') {
+                                const a = getRandomInt(3, 10);
+                                const b = getRandomInt(3, 10);
+                                problem.question = `In a right-angled triangle, the two shorter sides are $${a}$ and $${b}$. What is the length of the hypotenuse? (Round to 2 decimal places)`;
+                                problem.solution = `${Math.sqrt(a*a + b*b).toFixed(2)}`;
+                            } else {
+                                const leg = getRandomInt(3, 10);
+                                const hyp = getRandomInt(leg + 1, leg + 7);
+                                problem.question = `In a right-angled triangle, one shorter side is $${leg}$ and the hypotenuse is $${hyp}$. What is the length of the other shorter side? (Round to 2 decimal places)`;
+                                problem.solution = `${Math.sqrt(hyp*hyp - leg*leg).toFixed(2)}`;
+                            }
+                            break;
+                        case 'exponential_basic':
+                            const baseExp = getRandomInt(2, 5);
+                            const resultExp = Math.pow(baseExp, getRandomInt(2, 4));
+                            problem.question = `Solve for $x$: $${baseExp}^x = ${resultExp}$`;
+                            problem.solution = `x = ${Math.log(resultExp) / Math.log(baseExp)}`;
+                            break;
+                        case 'circle_equation':
+                            const h = getRandomInt(-5, 5);
+                            const k = getRandomInt(-5, 5);
+                            const r = getRandomInt(2, 10);
+                            problem.question = `What is the equation of a circle with center $(${h}, ${k})$ and radius $${r}$?`;
+                            problem.solution = `$(x - ${h})^2 + (y - ${k})^2 = ${r*r}$`;
+                            break;
+                    }
+                    break;
+
+                case 'University Level':
+                    const typesUni = [
+                        'calculus_derivative', 'calculus_integral', 'linear_algebra_matrix', 'advanced_algebra_log',
+                        'calculus_limits_basic', 'diff_eq_separable', 'probability_basic', 'statistics_mean_median',
+                        'discrete_combinations_permutations', 'number_theory_modular_arithmetic', 'physics_ohm_law',
+                        'chemistry_ideal_gas_law', 'linear_algebra_determinant', 'linear_algebra_dot_product'
+                    ];
+                    type = typesUni[getRandomInt(0, typesUni.length - 1)];
+
+                    switch (type) {
+                        case 'calculus_derivative':
+                            const derivTypes = ['power_rule', 'product_rule', 'chain_rule'];
+                            const derivType = derivTypes[getRandomInt(0, derivTypes.length - 1)];
+                            if (derivType === 'power_rule') {
+                                const power = getRandomInt(2, 5);
+                                const coeff = getRandomInt(2, 10);
+                                problem.question = `Find the derivative of $f(x) = ${coeff}x^{${power}}$ with respect to $x$.`;
+                                problem.solution = `$\\frac{d}{dx}(${coeff}x^{${power}}) = ${coeff * power}x^{${power - 1}}$`;
+                            } else if (derivType === 'product_rule') {
+                                const c1 = getRandomInt(1, 3);
+                                const p1 = getRandomInt(1, 2);
+                                const c2 = getRandomInt(1, 3);
+                                const p2 = getRandomInt(1, 2);
+                                problem.question = `Find the derivative of $f(x) = (${c1}x^{${p1}})(${c2}x^{${p2}})$ with respect to $x$.`;
+                                // For solution, multiply first: f(x) = (c1*c2)x^(p1+p2), then differentiate
+                                problem.solution = `$\\frac{d}{dx}(${c1*c2}x^{${p1+p2}}) = ${c1*c2*(p1+p2)}x^{${p1+p2-1}}$`;
+                            } else { // chain rule (simple example)
+                                const outerCoeff = getRandomInt(2, 4);
+                                const innerCoeff = getRandomInt(2, 4);
+                                const innerConst = getRandomInt(1, 5);
+                                const outerPower = getRandomInt(2, 3);
+                                problem.question = `Find the derivative of $f(x) = ${outerCoeff}(${innerCoeff}x + ${innerConst})^{${outerPower}}$ with respect to $x$.`;
+                                problem.solution = `$\\frac{d}{dx}(${outerCoeff}(${innerCoeff}x + ${innerConst})^{${outerPower}}) = ${outerCoeff * outerPower * innerCoeff}(${innerCoeff}x + ${innerConst})^{${outerPower - 1}}$`;
+                            }
+                            break;
+                        case 'calculus_integral':
+                            const intTypes = ['indefinite_power', 'definite_power'];
+                            const intType = intTypes[getRandomInt(0, intTypes.length - 1)];
+                            if (intType === 'indefinite_power') {
+                                const intPower = getRandomInt(1, 4);
+                                const intCoeff = getRandomInt(1, 5);
+                                problem.question = `Find the indefinite integral of $f(x) = ${intCoeff}x^{${intPower}}$ with respect to $x$.`;
+                                problem.solution = `$\\int ${intCoeff}x^{${intPower}} dx = ${formatFraction(intCoeff, intPower + 1)}x^{${intPower + 1}} + C$`;
+                            } else { // definite integral
+                                const intPower = getRandomInt(0, 2); // x^0, x^1, x^2
+                                const intCoeff = getRandomInt(1, 5);
+                                const lower = getRandomInt(0, 2);
+                                const upper = getRandomInt(lower + 1, lower + 3);
+                                let antiDerivative = (x, coeff, power) => (coeff / (power + 1)) * Math.pow(x, power + 1);
+                                let sol = antiDerivative(upper, intCoeff, intPower) - antiDerivative(lower, intCoeff, intPower);
+                                problem.question = `Evaluate the definite integral: $\\int_{${lower}}^{${upper}} ${intCoeff}x^{${intPower}} dx$.`;
+                                problem.solution = `${sol.toFixed(2)}`;
+                            }
+                            break;
+                        case 'linear_algebra_matrix':
+                            const mat1 = [[getRandomInt(1,5), getRandomInt(1,5)], [getRandomInt(1,5), getRandomInt(1,5)]];
+                            const mat2 = [[getRandomInt(1,5), getRandomInt(1,5)], [getRandomInt(1,5), getRandomInt(1,5)]];
+                            const sumMat = [[mat1[0][0] + mat2[0][0], mat1[0][1] + mat2[0][1]], [mat1[1][0] + mat2[1][0], mat1[1][1] + mat2[1][1]]];
+                            problem.question = `Given matrices $A = \\begin{pmatrix} ${mat1[0][0]} & ${mat1[0][1]} \\\\ ${mat1[1][0]} & ${mat1[1][1]} \\end{pmatrix}$ and $B = \\begin{pmatrix} ${mat2[0][0]} & ${mat2[0][1]} \\\\ ${mat2[1][0]} & ${mat2[1][1]} \\end{pmatrix}$, find $A+B$.`;
+                            problem.solution = `$\\begin{pmatrix} ${sumMat[0][0]} & ${sumMat[0][1]} \\\\ ${sumMat[1][0]} & ${sumMat[1][1]} \\end{pmatrix}$`;
+                            break;
+                        case 'advanced_algebra_log':
+                            const base = getRandomInt(2, 5);
+                            const exp = getRandomInt(2, 4);
+                            const num = Math.pow(base, exp);
+                            problem.question = `Evaluate $\\log_{${base}}(${num})$.`;
+                            problem.solution = `${exp}`;
+                            break;
+                        case 'calculus_limits_basic':
+                            const limitType = ['polynomial', 'rational'];
+                            const limitFunc = limitType[getRandomInt(0, 1)];
+                            const a_limit = getRandomInt(-3, 3);
+                            if (limitFunc === 'polynomial') {
+                                const c = getRandomInt(1, 5);
+                                const p = getRandomInt(1, 3);
+                                const d = getRandomInt(1, 5);
+                                problem.question = `Evaluate $\\lim_{x \\to ${a_limit}} (${c}x^{${p}} + ${d})$.`;
+                                problem.solution = `${(c * Math.pow(a_limit, p) + d)}`;
+                            } else { // rational
+                                const n_c = getRandomInt(1, 5);
+                                const n_p = getRandomInt(1, 2);
+                                const d_c = getRandomInt(1, 5);
+                                const d_p = getRandomInt(1, 2);
+                                // Ensure denominator is not zero at the limit point for simplicity
+                                let val_denom = d_c * Math.pow(a_limit, d_p) + 1;
+                                if (val_denom === 0) { // adjust a_limit if it causes zero in denominator
+                                    a_limit = getRandomInt(-3, 3);
+                                    if (a_limit === 0) a_limit = 1; // avoid 0/0
+                                    val_denom = d_c * Math.pow(a_limit, d_p) + 1;
+                                }
+                                problem.question = `Evaluate $\\lim_{x \\to ${a_limit}} \\frac{${n_c}x^{${n_p}}}{${d_c}x^{${d_p}} + 1}$.`;
+                                problem.solution = `${(n_c * Math.pow(a_limit, n_p) / (d_c * Math.pow(a_limit, d_p) + 1)).toFixed(2)}`;
+                            }
+                            break;
+                        case 'diff_eq_separable':
+                            const k_val = getRandomInt(1, 5);
+                            problem.question = `Solve the differential equation $\\frac{dy}{dx} = ${k_val}y$.`;
+                            problem.solution = `$y = Ce^{${k_val}x}$`;
+                            break;
+                        case 'probability_basic':
+                            const totalEvents = getRandomInt(10, 50);
+                            const favorableEvents = getRandomInt(1, totalEvents - 1);
+                            problem.question = `In an experiment, there are ${totalEvents} possible outcomes, and ${favorableEvents} of them are favorable. What is the probability of a favorable outcome? (Express as a simplified fraction)`;
+                            problem.solution = `${formatFraction(favorableEvents, totalEvents)}`;
+                            break;
+                        case 'statistics_mean_median':
+                            const dataSize = getRandomInt(4, 7);
+                            const data = Array.from({ length: dataSize }, () => getRandomInt(1, 20)).sort((a, b) => a - b);
+                            const sum = data.reduce((acc, val) => acc + val, 0);
+                            const mean = (sum / dataSize).toFixed(2);
+                            let median;
+                            if (dataSize % 2 === 1) {
+                                median = data[Math.floor(dataSize / 2)];
+                            } else {
+                                median = ((data[dataSize / 2 - 1] + data[dataSize / 2]) / 2).toFixed(2);
+                            }
+                            const statType = ['mean', 'median'][getRandomInt(0, 1)];
+                            problem.question = `Given the data set $${JSON.stringify(data)}$, find the ${statType}.`;
+                            problem.solution = statType === 'mean' ? mean : median;
+                            break;
+                        case 'discrete_combinations_permutations':
+                            const n_comb = getRandomInt(5, 10);
+                            const k_comb = getRandomInt(2, Math.floor(n_comb / 2));
+                            const combPermType = ['combinations', 'permutations'][getRandomInt(0, 1)];
+                            const factorial = (num) => {
+                                if (num < 0) return -1;
+                                else if (num == 0) return 1;
+                                else {
+                                    let result = 1;
+                                    for (let i = num; i > 1; i--) result *= i;
+                                    return result;
+                                }
+                            };
+                            let result;
+                            if (combPermType === 'combinations') {
+                                result = factorial(n_comb) / (factorial(k_comb) * factorial(n_comb - k_comb));
+                                problem.question = `How many different combinations of $${k_comb}$ items can be chosen from a set of $${n_comb}$ distinct items?`;
+                            } else {
+                                result = factorial(n_comb) / factorial(n_comb - k_comb);
+                                problem.question = `How many different permutations of $${k_comb}$ items can be chosen from a set of $${n_comb}$ distinct items?`;
+                            }
+                            problem.solution = `${result}`;
+                            break;
+                        case 'number_theory_modular_arithmetic':
+                            const numMod = getRandomInt(10, 50);
+                            const modVal = getRandomInt(2, 10);
+                            problem.question = `What is $${numMod} \\pmod{${modVal}}$?`;
+                            problem.solution = `${numMod % modVal}`;
+                            break;
+                        case 'physics_ohm_law':
+                            let V_ohm, I_ohm, R_ohm;
+                            const ohmType = ['voltage', 'current', 'resistance'][getRandomInt(0, 2)];
+                            if (ohmType === 'voltage') {
+                                I_ohm = getRandomInt(1, 10); // Amps
+                                R_ohm = getRandomInt(5, 50); // Ohms
+                                V_ohm = I_ohm * R_ohm;
+                                problem.question = `A circuit has a current of $${I_ohm}$ Amperes and a resistance of $${R_ohm}$ Ohms. What is the voltage? (Use Ohm's Law: $V=IR$)`;
+                                problem.solution = `${V_ohm}$ Volts`;
+                            } else if (ohmType === 'current') {
+                                V_ohm = getRandomInt(10, 100); // Volts
+                                R_ohm = getRandomInt(5, 50); // Ohms
+                                I_ohm = (V_ohm / R_ohm).toFixed(2);
+                                problem.question = `A circuit has a voltage of $${V_ohm}$ Volts and a resistance of $${R_ohm}$ Ohms. What is the current? (Use Ohm's Law: $V=IR$)`;
+                                problem.solution = `${I_ohm}$ Amperes`;
+                            } else { // resistance
+                                V_ohm = getRandomInt(10, 100); // Volts
+                                I_ohm = getRandomInt(1, 10); // Amps
+                                R_ohm = (V_ohm / I_ohm).toFixed(2);
+                                problem.question = `A circuit has a voltage of $${V_ohm}$ Volts and a current of $${I_ohm}$ Amperes. What is the resistance? (Use Ohm's Law: $V=IR$)`;
+                                problem.solution = `${R_ohm}$ Ohms`;
+                            }
+                            break;
+                        case 'chemistry_ideal_gas_law':
+                            // PV = nRT; R = 0.0821 L·atm/(mol·K)
+                            const R_IDEAL = 0.0821;
+                            const gasType = ['pressure', 'volume', 'moles', 'temperature'][getRandomInt(0, 3)];
+                            let P_gas, V_gas, n_gas, T_gas;
+
+                            if (gasType === 'pressure') {
+                                V_gas = getRandomInt(5, 20); // Liters
+                                n_gas = getRandomInt(1, 5); // moles
+                                T_gas = getRandomInt(273, 373); // Kelvin (0-100 C)
+                                P_gas = ((n_gas * R_IDEAL * T_gas) / V_gas).toFixed(2);
+                                problem.question = `What is the pressure (in atm) of $${n_gas}$ moles of an ideal gas occupying $${V_gas}$ Liters at $${T_gas}$ Kelvin? (Use $R = 0.0821 \\frac{\\text{L} \\cdot \\text{atm}}{\\text{mol} \\cdot \\text{K}}$)`;
+                                problem.solution = `${P_gas}$ atm`;
+                            } else if (gasType === 'volume') {
+                                P_gas = getRandomInt(1, 10); // atm
+                                n_gas = getRandomInt(1, 5); // moles
+                                T_gas = getRandomInt(273, 373); // Kelvin
+                                V_gas = ((n_gas * R_IDEAL * T_gas) / P_gas).toFixed(2);
+                                problem.question = `What is the volume (in Liters) of $${n_gas}$ moles of an ideal gas at $${P_gas}$ atm and $${T_gas}$ Kelvin? (Use $R = 0.0821 \\frac{\\text{L} \\cdot \\text{atm}}{\\text{mol} \\cdot \\text{K}}$)`;
+                                problem.solution = `${V_gas}$ L`;
+                            } else if (gasType === 'moles') {
+                                P_gas = getRandomInt(1, 10); // atm
+                                V_gas = getRandomInt(5, 20); // Liters
+                                T_gas = getRandomInt(273, 373); // Kelvin
+                                n_gas = ((P_gas * V_gas) / (R_IDEAL * T_gas)).toFixed(2);
+                                problem.question = `How many moles are in an ideal gas at $${P_gas}$ atm occupying $${V_gas}$ Liters at $${T_gas}$ Kelvin? (Use $R = 0.0821 \\frac{\\text{L} \\cdot \\text{atm}}{\\text{mol} \\cdot \\text{K}}$)`;
+                                problem.solution = `${n_gas}$ moles`;
+                            } else { // temperature
+                                P_gas = getRandomInt(1, 10); // atm
+                                V_gas = getRandomInt(5, 20); // Liters
+                                n_gas = getRandomInt(1, 5); // moles
+                                T_gas = ((P_gas * V_gas) / (n_gas * R_IDEAL)).toFixed(2);
+                                problem.question = `What is the temperature (in Kelvin) of $${n_gas}$ moles of an ideal gas at $${P_gas}$ atm occupying $${V_gas}$ Liters? (Use $R = 0.0821 \\frac{\\text{L} \\cdot \\text{atm}}{\\text{mol} \\cdot \\text{K}}$)`;
+                                problem.solution = `${T_gas}$ K`;
+                            }
+                            break;
+                        case 'linear_algebra_determinant':
+                            const detMatrix = [[getRandomInt(1, 5), getRandomInt(1, 5)], [getRandomInt(1, 5), getRandomInt(1, 5)]];
+                            const detVal = detMatrix[0][0] * detMatrix[1][1] - detMatrix[0][1] * detMatrix[1][0];
+                            problem.question = `Find the determinant of the matrix $A = \\begin{pmatrix} ${detMatrix[0][0]} & ${detMatrix[0][1]} \\\\ ${detMatrix[1][0]} & ${detMatrix[1][1]} \\end{pmatrix}$.`;
+                            problem.solution = `${detVal}`;
+                            break;
+                        case 'linear_algebra_dot_product':
+                            const v1 = [getRandomInt(-5, 5), getRandomInt(-5, 5), getRandomInt(-5, 5)];
+                            const v2 = [getRandomInt(-5, 5), getRandomInt(-5, 5), getRandomInt(-5, 5)];
+                            const dotProduct = v1[0]*v2[0] + v1[1]*v2[1] + v1[2]*v2[2];
+                            problem.question = `Find the dot product of vectors $\\mathbf{v}_1 = \\begin{pmatrix} ${v1[0]} \\\\ ${v1[1]} \\\\ ${v1[2]} \\end{pmatrix}$ and $\\mathbf{v}_2 = \\begin{pmatrix} ${v2[0]} \\\\ ${v2[1]} \\\\ ${v2[2]} \\end{pmatrix}$.`;
+                            problem.solution = `${dotProduct}`;
+                            break;
+                    }
+                    break;
+            }
+            return problem;
+        }
+
+        function renderProblems() {
+            const problemsContainer = document.getElementById('problems-container');
+            problemsContainer.innerHTML = ''; // Clear previous problems
+
+            // Stop and reset timer when new problems are generated
+            resetTimer();
+
+            const levels = ['5th Grade', 'High School', 'University Level'];
+            const numProblems = 16;
+            const levelDistribution = {
+                '5th Grade': 4,
+                'High School': 6,
+                'University Level': 6
+            };
+
+            let generatedProblems = [];
+
+            // Generate problems according to distribution
+            for (let level of levels) {
+                for (let i = 0; i < levelDistribution[level]; i++) {
+                    generatedProblems.push(generateProblem(level));
+                }
+            }
+
+            // Shuffle problems to mix levels
+            generatedProblems.sort(() => Math.random() - 0.5);
+
+            // Ensure we have exactly 16 problems
+            while (generatedProblems.length < numProblems) {
+                generatedProblems.push(generateProblem(levels[getRandomInt(0, levels.length - 1)]));
+            }
+            generatedProblems = generatedProblems.slice(0, numProblems);
+
+
+            generatedProblems.forEach((prob, index) => {
+                const problemCard = document.createElement('div');
+                problemCard.className = 'problem-card';
+
+                // Use a more robust regex to distinguish inline vs display math.
+                // Replace $$...$$ with <span class="latex-display-formula">...</span>
+                // Replace $...$ with <span class="latex-formula">...</span>
+                let questionHtml = prob.question.replace(/\$\$(.*?)\$\$/g, '<span class="latex-display-formula">$$$1$$</span>');
+                questionHtml = questionHtml.replace(/\$(.*?)\$/g, '<span class="latex-formula">$$$1$$</span>');
+
+                let solutionHtml = prob.solution.toString().replace(/\$\$(.*?)\$\$/g, '<span class="latex-display-formula">$$$1$$</span>');
+                solutionHtml = solutionHtml.replace(/\$(.*?)\$/g, '<span class="latex-formula">$$$1$$</span>');
+
+                problemCard.innerHTML = `
+                    <p class="text-xs font-semibold text-blue-600 mb-2">${index + 1}. Difficulty: ${prob.difficulty}</p>
+                    <p class="problem-question">
+                        ${questionHtml}
+                    </p>
+                    <button class="toggle-button" onclick="toggleSolution(this)">Show Solution</button>
+                    <div class="solution">
+                        Solution: ${solutionHtml}
+                    </div>
+                `;
+                problemsContainer.appendChild(problemCard);
+            });
+            renderMathJax(); // Render LaTeX after problems are added to DOM
+        }
+
+        // Function to toggle solution visibility
+        function toggleSolution(button) {
+            const solutionDiv = button.nextElementSibling;
+            solutionDiv.classList.toggle('visible');
+            button.textContent = solutionDiv.classList.contains('visible') ? 'Hide Solution' : 'Show Solution';
+        }
+
+        // Function to load and render MathJax
+        function renderMathJax() {
+            // Check if MathJax is already loaded and configured
+            if (window.MathJax && window.MathJax.typeset) {
+                window.MathJax.typesetPromise(); // Use typesetPromise for async rendering
+            } else {
+                // Configure MathJax to process TeX in HTML
+                window.MathJax = {
+                    tex: {
+                        inlineMath: [['$', '$'], ['\\(', '\\)']],
+                        displayMath: [['$$', '$$'], ['\\[', '\\]']]
+                    },
+                    svg: {
+                        fontCache: 'global'
+                    },
+                    options: {
+                        enableMenu: false, // Disable right-click menu
+                        skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+                    }
+                };
+                // Load MathJax library
+                const script = document.createElement('script');
+                script.src = 'https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+                script.async = true;
+                document.head.appendChild(script);
+            }
+        }
+
+        // Timer functions
+        function updateTimerDisplay() {
+            const timerDisplay = document.getElementById('timer-display');
+            const totalSeconds = Math.floor(elapsedTime / 1000);
+            const hours = Math.floor(totalSeconds / 3600);
+            const minutes = Math.floor((totalSeconds % 3600) / 60);
+            const seconds = totalSeconds % 60;
+
+            const formatTime = (time) => String(time).padStart(2, '0');
+            timerDisplay.textContent = `${formatTime(hours)}:${formatTime(minutes)}:${formatTime(seconds)}`;
+        }
+
+        function startTimer() {
+            if (!isTimerRunning) {
+                startTime = Date.now() - elapsedTime; // Adjust startTime if resuming
+                timerInterval = setInterval(() => {
+                    elapsedTime = Date.now() - startTime;
+                    updateTimerDisplay();
+                }, 1000);
+                isTimerRunning = true;
+            }
+        }
+
+        function stopTimer() {
+            if (isTimerRunning) {
+                clearInterval(timerInterval);
+                isTimerRunning = false;
+            }
+        }
+
+        function resetTimer() {
+            stopTimer();
+            elapsedTime = 0;
+            updateTimerDisplay();
+        }
+
+        // Digital Clock functions
+        function updateDigitalClock() {
+            const now = new Date();
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const seconds = String(now.getSeconds()).padStart(2, '0');
+            document.getElementById('digital-clock').textContent = `${hours}:${minutes}:${seconds}`;
+        }
+
+        // Event listeners for timer controls
+        document.getElementById('start-timer').addEventListener('click', startTimer);
+        document.getElementById('stop-timer').addEventListener('click', stopTimer);
+        document.getElementById('reset-timer').addEventListener('click', resetTimer);
+
+        // Event listener for generating new problems
+        document.getElementById('generate-new-problems').addEventListener('click', renderProblems);
+
+        // Initial render when the page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            renderProblems();
+            updateDigitalClock(); // Initial call for digital clock
+            setInterval(updateDigitalClock, 1000); // Update digital clock every second
+        });
+    </script>
+</body>
+</html>
